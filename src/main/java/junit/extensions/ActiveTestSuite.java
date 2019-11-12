@@ -29,6 +29,10 @@ public class ActiveTestSuite extends TestSuite {
         super(theClass, name);
     }
 
+    /**
+     * 运行测试用例，且收集测试用例的执行结果
+     * @param result
+     */
     @Override
     public void run(TestResult result) {
         fActiveTestDeathCount = 0;
@@ -36,6 +40,11 @@ public class ActiveTestSuite extends TestSuite {
         waitUntilFinished();
     }
 
+    /**
+     * 运行测试用例，且收集测试用例的执行结果
+     * @param test
+     * @param result
+     */
     @Override
     public void runTest(final Test test, final TestResult result) {
         Thread t = new Thread() {
@@ -53,9 +62,15 @@ public class ActiveTestSuite extends TestSuite {
         t.start();
     }
 
+    /**
+     * 等待知道所有测试用例都运行结束
+     */
     synchronized void waitUntilFinished() {
         while (fActiveTestDeathCount < testCount()) {
             try {
+                /**
+                 * 阻塞主线程
+                 */
                 wait();
             } catch (InterruptedException e) {
                 return; // ignore
@@ -63,6 +78,9 @@ public class ActiveTestSuite extends TestSuite {
         }
     }
 
+    /**
+     * 运行结束，唤醒主线程
+     */
     synchronized public void runFinished() {
         fActiveTestDeathCount++;
         notifyAll();
