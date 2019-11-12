@@ -34,8 +34,14 @@ public class TestResult {
      * caused the error.
      */
     public synchronized void addError(Test test, Throwable e) {
+        /**
+         * 添加测试用例错误的相关信息
+         */
         fErrors.add(new TestFailure(test, e));
         for (TestListener each : cloneListeners()) {
+            /**
+             * 执行测试用例的各种监听器的执行错误的方法
+             */
             each.addError(test, e);
         }
     }
@@ -45,8 +51,14 @@ public class TestResult {
      * caused the failure.
      */
     public synchronized void addFailure(Test test, AssertionFailedError e) {
+        /**
+         * 添加测试用例失败的相关信息
+         */
         fFailures.add(new TestFailure(test, e));
         for (TestListener each : cloneListeners()) {
+            /**
+             * 执行测试用例的各种监听器的执行失败的方法
+             */
             each.addFailure(test, e);
         }
     }
@@ -116,14 +128,25 @@ public class TestResult {
      * Runs a TestCase.
      */
     protected void run(final TestCase test) {
+        /**
+         * 执行测试用例的各种监听器的开始执行方法
+         */
         startTest(test);
         Protectable p = new Protectable() {
             public void protect() throws Throwable {
+                /**
+                 * 执行测试用例
+                 */
                 test.runBare();
             }
         };
+        /**
+         * 执行受保护的测试方法
+         */
         runProtected(test, p);
-
+        /**
+         * 执行测试用例的各种监听器的结束执行方法
+         */
         endTest(test);
     }
 
@@ -139,12 +162,21 @@ public class TestResult {
      */
     public void runProtected(final Test test, Protectable p) {
         try {
+            /**
+             * 执行受保护的测试用例方法
+             */
             p.protect();
         } catch (AssertionFailedError e) {
+            /**
+             * 添加测试失败的相关信息
+             */
             addFailure(test, e);
         } catch (ThreadDeath e) { // don't catch ThreadDeath by accident
             throw e;
         } catch (Throwable e) {
+            /**
+             * 添加测试错误的相关信息
+             */
             addError(test, e);
         }
     }
@@ -160,11 +192,23 @@ public class TestResult {
      * Informs the result that a test will be started.
      */
     public void startTest(Test test) {
+        /**
+         * 计算测试用例的个数
+         */
         final int count = test.countTestCases();
+        /**
+         * 记录运行的测试用例个数
+         */
         synchronized (this) {
             fRunTests += count;
         }
+        /**
+         * 执行测试用例的各种监听器的开始方法
+         */
         for (TestListener each : cloneListeners()) {
+            /**
+             * 执行测试用例的监听器的开始方法
+             */
             each.startTest(test);
         }
     }

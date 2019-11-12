@@ -10,3 +10,16 @@ For more information, please visit:
 
 [![Built on DEV@cloud](http://www.cloudbees.com/sites/default/files/Button-Built-on-CB-1.png)](http://www.cloudbees.com/foss/foss-dev.cb)
 
+
+测试的核心类：
+
+1：Test
+
+2：Assert
+
+3：TestSuite
+
+4：TestCase
+
+5：TestRunner
+

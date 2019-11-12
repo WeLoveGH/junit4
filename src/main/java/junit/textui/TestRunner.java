@@ -1,14 +1,14 @@
 package junit.textui;
 
 
-import java.io.PrintStream;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 import junit.runner.BaseTestRunner;
 import junit.runner.Version;
+
+import java.io.PrintStream;
 
 /**
  * A command line based tool to run tests.
@@ -74,6 +74,9 @@ public class TestRunner extends BaseTestRunner {
      */
     static public TestResult run(Test test) {
         TestRunner runner = new TestRunner();
+        /**
+         * 测试用例执行器，执行测试用例套件
+         */
         return runner.doRun(test);
     }
 
@@ -105,25 +108,65 @@ public class TestRunner extends BaseTestRunner {
         return new TestResult();
     }
 
+    /**
+     * 执行测试用例套件，且不需要等待（需要等待，意味着要打印一下运行的日志信息）
+     * @param test
+     * @return
+     */
     public TestResult doRun(Test test) {
         return doRun(test, false);
     }
 
+    /**
+     * 执行测试用例套件
+     * @param suite
+     * @param wait
+     * @return
+     */
     public TestResult doRun(Test suite, boolean wait) {
+        /**
+         * 构建测试用例的执行结果实例
+         */
         TestResult result = createTestResult();
+        /**
+         * 添加结果打印监听器
+         */
         result.addListener(fPrinter);
+        /**
+         * 获取测试方法的开始执行时间
+         */
         long startTime = System.currentTimeMillis();
+        /**
+         * 执行测试用例套件中的测试用例，并将结果放入测试执行结果的实例中
+         * 核心
+         */
         suite.run(result);
+        /**
+         * 获取测试方法的结束执行时间
+         */
         long endTime = System.currentTimeMillis();
+        /**
+         * 计算测试用例套件的运行时间
+         */
         long runTime = endTime - startTime;
+        /**
+         * 打印测试执行结果及运行时间的信息
+         */
         fPrinter.print(result, runTime);
-
+        /**
+         * 是否打印运行记录
+         */
         pause(wait);
+        /**
+         * 返回测试用例的执行结果
+         */
         return result;
     }
 
     protected void pause(boolean wait) {
-        if (!wait) return;
+        if (!wait) {
+            return;
+        }
         fPrinter.printWaitPrompt();
         try {
             System.in.read();

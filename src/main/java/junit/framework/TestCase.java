@@ -137,19 +137,41 @@ public abstract class TestCase extends Assert implements Test {
      */
     public void runBare() throws Throwable {
         Throwable exception = null;
+        /**
+         * 执行测试用例的设置方法
+         */
         setUp();
         try {
+            /**
+             * 执行测试用例的测试方法
+             */
             runTest();
         } catch (Throwable running) {
+            /**
+             * 运行时异常
+             */
             exception = running;
         } finally {
             try {
+                /**
+                 * 执行测试用例的卸载方法，比如：关闭网络链接
+                 */
                 tearDown();
             } catch (Throwable tearingDown) {
-                if (exception == null) exception = tearingDown;
+                if (exception == null) {
+                    /**
+                     * 卸载时异常
+                     */
+                    exception = tearingDown;
+                }
             }
         }
-        if (exception != null) throw exception;
+        /**
+         * 测试用例的方法执行过程中出现异常，则抛出响应的异常
+         */
+        if (exception != null) {
+            throw exception;
+        }
     }
 
     /**
@@ -165,15 +187,24 @@ public abstract class TestCase extends Assert implements Test {
             // methods. getDeclaredMethods returns all
             // methods of this class but excludes the
             // inherited ones.
+            /**
+             * 获取执行方法的名称
+             */
             runMethod = getClass().getMethod(fName, (Class[]) null);
         } catch (NoSuchMethodException e) {
             fail("Method \"" + fName + "\" not found");
         }
+        /**
+         * 判断测试用例的方法，是否为公共方法，如果不是，则打印响应的告警信息
+         */
         if (!Modifier.isPublic(runMethod.getModifiers())) {
             fail("Method \"" + fName + "\" should be public");
         }
 
         try {
+            /**
+             * 执行测试用例的方法，最终是调用的本地方法，通过JAVA反射获取方法的相关信息，然后做各种校验，然后调用本地方法，执行方法
+             */
             runMethod.invoke(this);
         } catch (InvocationTargetException e) {
             e.fillInStackTrace();

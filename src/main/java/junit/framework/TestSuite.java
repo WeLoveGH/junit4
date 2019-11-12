@@ -1,5 +1,8 @@
 package junit.framework;
 
+import org.junit.internal.MethodSorter;
+import org.junit.internal.Throwables;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -8,9 +11,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
-
-import org.junit.internal.MethodSorter;
-import org.junit.internal.Throwables;
 
 /**
  * A <code>TestSuite</code> is a <code>Composite</code> of Tests.
@@ -49,6 +49,9 @@ public class TestSuite implements Test {
     static public Test createTest(Class<?> theClass, String name) {
         Constructor<?> constructor;
         try {
+            /**
+             * 获取测试用例的构造器
+             */
             constructor = getTestConstructor(theClass);
         } catch (NoSuchMethodException e) {
             return warning("Class " + theClass.getName() + " has no public constructor TestCase(String name) or TestCase()");
@@ -56,11 +59,20 @@ public class TestSuite implements Test {
         Object test;
         try {
             if (constructor.getParameterTypes().length == 0) {
+                /**
+                 * 通过无参构造器，构造测试用例的实例
+                 */
                 test = constructor.newInstance(new Object[0]);
                 if (test instanceof TestCase) {
+                    /**
+                     * 如果是测试用例，则设置测试用例的名字
+                     */
                     ((TestCase) test).setName(name);
                 }
             } else {
+                /**
+                 * 通过有参构造器，构造测试用例实例
+                 */
                 test = constructor.newInstance(new Object[]{name});
             }
         } catch (InstantiationException e) {
@@ -70,6 +82,9 @@ public class TestSuite implements Test {
         } catch (IllegalAccessException e) {
             return (warning("Cannot access test case: " + name + " (" + Throwables.getStacktrace(e) + ")"));
         }
+        /**
+         * 将构造的实例，转换为测试用例实例
+         */
         return (Test) test;
     }
 
@@ -118,15 +133,28 @@ public class TestSuite implements Test {
         addTestsFromTestCase(theClass);
     }
 
+    /**
+     * 添加测试方法，根据测试用例
+     * @param theClass
+     */
     private void addTestsFromTestCase(final Class<?> theClass) {
+        /**
+         * 获取测试用例的名称
+         */
         fName = theClass.getName();
         try {
+            /**
+             * 获取测试用例的构造器，测试用例，必须拥有一个无参构造方法或者有一个字符串类型的有参构造方法
+             */
             getTestConstructor(theClass); // Avoid generating multiple error messages
         } catch (NoSuchMethodException e) {
             addTest(warning("Class " + theClass.getName() + " has no public constructor TestCase(String name) or TestCase()"));
             return;
         }
 
+        /**
+         * 测试用例的类权限修饰符必须是公共的
+         */
         if (!Modifier.isPublic(theClass.getModifiers())) {
             addTest(warning("Class " + theClass.getName() + " is not public"));
             return;
@@ -134,12 +162,25 @@ public class TestSuite implements Test {
 
         Class<?> superClass = theClass;
         List<String> names = new ArrayList<String>();
+
+        /**
+         * 测试用例必须是Test类的子类
+         */
         while (Test.class.isAssignableFrom(superClass)) {
             for (Method each : MethodSorter.getDeclaredMethods(superClass)) {
+                /**
+                 * 将测试用例的实例，加入测试实例的列表
+                 */
                 addTestMethod(each, names, theClass);
             }
+            /**
+             * 获取测试用例实例的父类，这里很关键，就是将所有的测试方法都放入测试集合的列表中
+             */
             superClass = superClass.getSuperclass();
         }
+        /**
+         * 如果没有测试用例的实例对象，则打印响应的告警日志
+         */
         if (fTests.size() == 0) {
             addTest(warning("No tests found in " + theClass.getName()));
         }
@@ -233,10 +274,18 @@ public class TestSuite implements Test {
             if (result.shouldStop()) {
                 break;
             }
+            /**
+             * 执行测试用例且记录测试用例的运行结果
+             */
             runTest(each, result);
         }
     }
 
+    /**
+     * 执行测试用例且记录测试用例的运行结果
+     * @param test
+     * @param result
+     */
     public void runTest(Test test, TestResult result) {
         test.run(result);
     }
@@ -281,25 +330,59 @@ public class TestSuite implements Test {
         return super.toString();
     }
 
+    /**
+     * 添加测试方法
+     * @param m
+     * @param names
+     * @param theClass
+     */
     private void addTestMethod(Method m, List<String> names, Class<?> theClass) {
+        /**
+         * 获取方法的名字
+         */
         String name = m.getName();
+        /**
+         * 如果此方法已经加入方法列表，则直接返回，啥都不做
+         */
         if (names.contains(name)) {
             return;
         }
+        /**
+         * 如果方法是非公共的方法，且是测试方法，则打印告警信息
+         */
         if (!isPublicTestMethod(m)) {
             if (isTestMethod(m)) {
                 addTest(warning("Test method isn't public: " + m.getName() + "(" + theClass.getCanonicalName() + ")"));
             }
             return;
         }
+        /**
+         * 加入方法列表
+         */
         names.add(name);
+        /**
+         * 将测试用例的实例加入列表
+         */
         addTest(createTest(theClass, name));
     }
 
+    /**
+     * 是否为公共的测试方法
+     * @param m
+     * @return
+     */
     private boolean isPublicTestMethod(Method m) {
         return isTestMethod(m) && Modifier.isPublic(m.getModifiers());
     }
 
+    /**
+     * 是否为测试方法，测试方法的特点：
+     * 1：没有参数
+     * 2：以 test 开头
+     * 3：没有返回类型
+     * @param m
+     * @return
+     */
     private boolean isTestMethod(Method m) {
         return m.getParameterTypes().length == 0 &&
                 m.getName().startsWith("test") &&

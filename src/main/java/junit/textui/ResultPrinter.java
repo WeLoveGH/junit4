@@ -1,15 +1,11 @@
 package junit.textui;
 
+import junit.framework.*;
+import junit.runner.BaseTestRunner;
+
 import java.io.PrintStream;
 import java.text.NumberFormat;
 import java.util.Enumeration;
-
-import junit.framework.AssertionFailedError;
-import junit.framework.Test;
-import junit.framework.TestFailure;
-import junit.framework.TestListener;
-import junit.framework.TestResult;
-import junit.runner.BaseTestRunner;
 
 public class ResultPrinter implements TestListener {
     PrintStream fWriter;
@@ -49,7 +45,9 @@ public class ResultPrinter implements TestListener {
     }
 
     protected void printDefects(Enumeration<TestFailure> booBoos, int count, String type) {
-        if (count == 0) return;
+        if (count == 0) {
+            return;
+        }
         if (count == 1) {
             getWriter().println("There was " + count + " " + type + ":");
         } else {
