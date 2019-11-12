@@ -14,11 +14,15 @@ For more information, please visit:
 注意：一定要好好阅读对应的超文本文件
 
 告诉我们如何使用一个简单的框架，进行可重用测试用例的开发
+
 JUnit Test Infected: Programmers Love Writing Tests
+
 http://localhost:63342/junit4/doc/testinfected/testing.htm
 
 告诉我们如何实现一个简单的测试框架
+
 JUnit A Cook's Tour
+
 http://localhost:63342/junit4/doc/cookstour/cookstour.htm
 
 
